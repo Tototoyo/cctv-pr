@@ -1,18 +1,13 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import type { GeneratorOptions } from '../types';
 
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
 if (!apiKey) {
-  throw new Error('Missing Gemini API key');
+  throw new Error('Missing OpenAI API key');
 }
-
-const genAI = new GoogleGenerativeAI(apiKey);
 
 export async function generateCctvPrompt(options: GeneratorOptions): Promise<string> {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
-
     const prompt = `Generate a highly detailed CCTV surveillance camera prompt for AI video generation. Use the following parameters:
 
 Scene Description: ${options.scene}
@@ -31,9 +26,36 @@ Create a realistic CCTV-style video prompt that includes:
 
 Format the output as a single detailed paragraph optimized for AI video generation tools like Runway, Pika, or Sora.`;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an expert at creating detailed CCTV surveillance camera prompts for AI video generation. Generate realistic, detailed prompts that capture authentic surveillance footage characteristics.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 1000,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error?.message || 'OpenAI API request failed');
+    }
+
+    const data = await response.json();
+    const text = data.choices[0]?.message?.content;
 
     if (!text) {
       throw new Error('No response generated');
