@@ -4,7 +4,7 @@ import { PromptGenerator } from './components/PromptGenerator';
 import { PromptDisplay } from './components/PromptDisplay';
 import { PromptGallery } from './components/PromptGallery';
 import { Footer } from './components/Footer';
-import { generateCctvPrompt } from './services/geminiService';
+import { generateCctvPrompt } from './services/openaiService';
 import { addPrompt } from './services/supabaseService';
 import type { GeneratorOptions } from './types';
 import { AlertCircle, Camera, Sparkles, Zap } from 'lucide-react';
@@ -37,10 +37,10 @@ function App() {
   };
 
   // Check if environment variables are set
-  const hasGeminiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  const hasOpenAIKey = import.meta.env.VITE_OPENAI_API_KEY;
   const hasSupabaseConfig = import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-  if (!hasGeminiKey || !hasSupabaseConfig) {
+  if (!hasOpenAIKey || !hasSupabaseConfig) {
     return (
       <div className="min-h-screen bg-gray-950 text-slate-300 flex items-center justify-center p-4">
         <div className="max-w-2xl w-full bg-gray-900 border border-red-400/30 rounded-lg p-8">
@@ -53,8 +53,8 @@ function App() {
           </p>
           <div className="bg-gray-950 border border-slate-700 rounded-md p-4 mb-4">
             <ul className="space-y-2 text-sm font-mono">
-              {!hasGeminiKey && (
-                <li className="text-red-400">❌ VITE_GEMINI_API_KEY</li>
+              {!hasOpenAIKey && (
+                <li className="text-red-400">❌ VITE_OPENAI_API_KEY</li>
               )}
               {!hasSupabaseConfig && (
                 <>
@@ -66,7 +66,10 @@ function App() {
           </div>
           <p className="text-slate-400 text-sm">
             Create a <code className="bg-gray-950 px-2 py-1 rounded text-green-400">.env</code> file 
-            in the project root with these variables. See <code className="bg-gray-950 px-2 py-1 rounded text-green-400">.env.example</code> for reference.
+            in the project root with these variables. Get OpenAI key from{' '}
+            <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-green-400 hover:underline">
+              platform.openai.com/api-keys
+            </a>
           </p>
         </div>
       </div>
